@@ -1,0 +1,76 @@
+#include "../inc/learner.h"
+#include "../inc/mySqlWrapper.h"
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
+
+using namespace std;
+const char* gszFile = "/home/vaibhavdhingani/home/MyAIapp/AI/memory/memory.db";
+
+void Learner::respond(string phrase)
+{
+    // Browse into memory
+    //fstream memory;
+    //memory.open("/home/vaibhavdhingani/home/AI/memory/memory.txt", ios::in);
+
+	SqlDB db;
+	string SqlQuery;
+
+	db.open(gszFile);
+	cout << endl << "Creating memory table" << endl;
+	db.execDML("create table memory(MemIndex int, MemQuestion char(20), MemAnswer char(20));");
+
+#if 0
+    // Try to find from memory
+    while(!memory.eof())
+    {
+        string identifier;
+        getline (memory, identifier);
+
+        // Data foud in memory
+        if(identifier == phrase)
+        {
+            string response;
+            getline(memory, response);
+            voice.say(response);
+            return ;
+        }
+    }
+    memory.close();
+#endif
+
+    // Learn new things and store into memory
+    //memory.open("memory/memory.txt", ios::out | ios::app);
+    //memory << phrase << endl;
+	db.open(gszFile);
+
+    voice.say("I don't know what you just said.");
+    voice.say("I will like to know more on this.");
+    
+	//voice.say(phrase);
+    string userResponse;
+    cout << "You: ";
+    getline(cin, userResponse);
+    if(phrase == "bye")
+    {
+        //memory.close();
+        exit(0);
+    }
+    else
+	{
+		SqlQuery = "insert into memory values (1, '" + phrase + "', " + "'" + userResponse + "');" ;
+		//cout << "Sql Query == " << SqlQuery << endl;
+		char* chr = strdup(SqlQuery.c_str());
+		db.execDML(SqlQuery.c_str());
+		//db.execDML("insert into memory values (1, 'hi', 'hello');");
+        //memory << userResponse << endl;
+	}
+
+	db.close();
+    //memory.close();
+}
+
+void Learner::say(string phrase)
+{
+    this->voice.say(phrase);
+}
